@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>GAF</id>
+    <version>2.2.2</version>
+    <title>GAF</title>
+    <authors>John Newcombe</authors>
+    <owners>John Newcombe</owners>
+    <licenseUrl>http://johnnewcombe.net/gaf</licenseUrl>
+    <projectUrl>http://johnnewcombe.net/gaf</projectUrl>
+    <iconUrl>http://johnnewcombe.net/Content/nuget/GAF128.ico</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This is a simple to use Genetic Algorithm Framework for .Net. See the project page for details on how to use this package.</description>
+    <summary />
+    <releaseNotes>This version includes a fix to the RandomReplace and Memory operators and introduces a new event (Population.OnEvaluationBegin).</releaseNotes>
+    <copyright>Copyright John Newcombe 2016</copyright>
+    <language />
+    <tags>Genetic Algorithm GA</tags>
+  </metadata>
+</package>
