@@ -8,40 +8,43 @@ namespace GeneticAlgorithmTimeTable
 {    
     class Course
     {
-        public int ID { private set; get; }                 // 강좌 번호
+        public int ID { private set; get; }                 // 강좌 번호(임의로 붙임)
+        public int Year { private set; get; }               // 학년
         public string Name { private set; get; }            // 강좌 이름
+        public int CourseNumber { private set; get; }       // 동일 강좌 중 강좌 번호
+        public bool IsMandatory { private set; get; }       // 전공 필수 과목인지 여부
         public int Credit { private set; get; }             // 학점 수
-        public CourseDay Day { private set; get; }          // 요일
-        public CoursePeriod Period { private set; get; }    // 시작 시간
-    }
+        public int TheoryCredit { private set; get; }       // 이론 학점 수(나머지는 실험)
+        public string Teacher { private set; get; }         // 교수자
+        public string FixedTime { private set; get; }       // 고정 시간표일 경우 그 표시. 아닌 경우 String.Empty로 처리
 
-    /// <summary>
-    /// 수업 요일
-    /// </summary>
-    enum CourseDay
-    {
-        MondayWednesday,        // 월수
-        TuesdayThursday,        // 화목
-        Friday,                 // 금
-    }
+        /// <summary>
+        /// 텍스트 정보로부터 Course 클래스 객체를 생성합니다.
+        /// </summary>
+        public Course(string line, char delimiter)
+        {
+            FixedTime = String.Empty;
 
-    /// <summary>
-    /// 수업 시작 시간
-    /// </summary>
-    enum CoursePeriod
-    {
-        _0,     // 0 교시, 08시~09시
-        _1,     // 1 교시, 09시~10시
-        _2,     // 2 교시, 10시~11시
-        _3,     // 3 교시, 11시~12시
-        _4,     // 4 교시, 12시~13시
-        _5,     // 5 교시, 13시~14시
-        _6,     // 6 교시, 14시~15시
-        _7,     // 7 교시, 15시~16시
-        _8,     // 8 교시, 16시~17시
-        _9,     // 9 교시, 17시~18시
-        _10,    // 10 교시, 18시~19시
-        _11,    // 11 교시, 19시~20시
-        // 추가바람
+            string[] tokens = line.Split(delimiter);
+            int i = 0;
+
+            try
+            {
+                ID = Int32.Parse(tokens[i++]);
+                Year = Int32.Parse(tokens[i++]);
+                Name = tokens[i++];
+                CourseNumber = Int32.Parse(tokens[i++]);
+                IsMandatory = Boolean.Parse(tokens[i++]);
+                Credit = Int32.Parse(tokens[i++]);
+                TheoryCredit = Int32.Parse(tokens[i++]);
+                Teacher = tokens[i++];
+                if (tokens.Length >= i && tokens[i].Length > 0)
+                    FixedTime = tokens[i++];
+            }   
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
     }
 }

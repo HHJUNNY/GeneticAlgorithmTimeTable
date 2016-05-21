@@ -42,7 +42,10 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants.cs" />
     <Compile Include="Course.cs" />
+    <Compile Include="CourseGene.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="TimeTable.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
