@@ -45,8 +45,19 @@ namespace GeneticAlgorithmTimeTable
                             int randomIndex = Program.Ran.Next(Constants.Instance.AvailableDay_3Credit.Count);
                             Day = Constants.Instance.AvailableDay_3Credit[randomIndex];
                             // 시간 결정
-                            randomIndex = Program.Ran.Next(Constants.Instance.AvailablePeriod_3Credit.Count);
-                            Period = Constants.Instance.AvailablePeriod_3Credit[randomIndex];
+                            randomIndex = Program.Ran.Next(Constants.Instance.AvailablePeriod_23Credit.Count);
+                            Period = Constants.Instance.AvailablePeriod_23Credit[randomIndex];
+                        }
+                        break;
+                    case 2:
+                        // 이론 2학점 수업: 월/화/수/목/금 중 2시간 연속 배정
+                        {
+                            // 요일 결정
+                            int randomIndex = Program.Ran.Next(Constants.Instance.AvailableDay_2Credit.Count);
+                            Day = Constants.Instance.AvailableDay_2Credit[randomIndex];
+                            // 시간 결정
+                            randomIndex = Program.Ran.Next(Constants.Instance.AvailablePeriod_23Credit.Count);
+                            Period = Constants.Instance.AvailablePeriod_23Credit[randomIndex];
                         }
                         break;
                     default:
@@ -123,17 +134,22 @@ namespace GeneticAlgorithmTimeTable
                 Tuple<double, double> y = target.ClassHoursOfWeek[j];
                 if (x.Item1 <= y.Item1)
                 {
-                    if (x.Item2 >= y.Item1) { return true; }
+                    if (x.Item2 > y.Item1) { return true; }
                     ++i;
                 }
                 else
                 {
-                    if (x.Item1 <= y.Item2) { return true; }
+                    if (x.Item1 < y.Item2) { return true; }
                     ++j;
                 }
             } while (i < ClassHoursOfWeek.Count && j < target.ClassHoursOfWeek.Count);
 
             return false;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1:D2}:{2:D2} [{3}]", Day == null ? "" : ((CourseDay)Day).ToString(), Period == null ? 0 : (int)Period, Period == null ? 0 : (int)(Period - (int)Period) * 60, CourseInfo.ToString());
         }
     }
 

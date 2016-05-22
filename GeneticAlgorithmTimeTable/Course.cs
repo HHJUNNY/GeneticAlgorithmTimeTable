@@ -8,7 +8,7 @@ namespace GeneticAlgorithmTimeTable
 {    
     class Course
     {
-        public int ID { private set; get; }                 // 강좌 번호(임의로 붙임)
+        public string ID { private set; get; }              // 강좌 번호
         public int Year { private set; get; }               // 학년
         public string Name { private set; get; }            // 강좌 이름
         public int CourseNumber { private set; get; }       // 동일 강좌 중 강좌 번호
@@ -30,7 +30,7 @@ namespace GeneticAlgorithmTimeTable
 
             try
             {
-                ID = Int32.Parse(tokens[i++]);
+                ID = tokens[i++].Trim();
                 Year = Int32.Parse(tokens[i++]);
                 Name = tokens[i++];
                 CourseNumber = Int32.Parse(tokens[i++]);
@@ -40,11 +40,16 @@ namespace GeneticAlgorithmTimeTable
                 Teacher = tokens[i++];
                 if (tokens.Length >= i && tokens[i].Length > 0)
                     FixedTime = tokens[i++];
-            }   
+            }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
             }
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0}: {1} ({2}) {3}", ID, Name, CourseNumber, Teacher);
         }
     }
 }
