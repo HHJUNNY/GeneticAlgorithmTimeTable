@@ -152,11 +152,9 @@ namespace GeneticAlgorithmTimeTable
                 if (rd <= mutationProbability)
                 {
                     CourseGene courseGene = (CourseGene)gene.ObjectValue;
-                    courseGene.GenerateRandomTime();
+                    gene.ObjectValue = new CourseGene(courseGene.CourseInfo);
                 }
             }
-
-            child.Evaluate(fitnessFunctionDelegate);
         }
 
         /// <summary>

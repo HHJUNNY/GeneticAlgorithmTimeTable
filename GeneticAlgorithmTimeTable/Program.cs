@@ -12,6 +12,7 @@ namespace GeneticAlgorithmTimeTable
     class Program
     {
         public static Random Ran = new Random();
+        private static List<List<string>> _studentDemands;
 
         private static void Main(string[] args)
         {
@@ -20,12 +21,12 @@ namespace GeneticAlgorithmTimeTable
             var courses = ReadCourses(reader);
             reader.Close();
             reader = new StreamReader("StudentDemand.txt", Encoding.Unicode);
-            var studentDemands = ReadStudentDemands(reader);
+            _studentDemands = ReadStudentDemands(reader);
             reader.Close();
 
             #region 초기 해 생성 부분
             // 초기 해(chromosome) 집합(population)을 수동으로 생성
-            var population = new Population();
+            var population = new Population(true, false);
             
             // population에 들어갈 chromosome생성
             for (var p = 0; p < Constants.Instance.PopulationSize; p++)
@@ -81,17 +82,17 @@ namespace GeneticAlgorithmTimeTable
         /// <summary>
         /// 교수자 - 강좌인덱스(chromosome에서의 순서) map
         /// </summary>
-        static Dictionary<string, List<int>> m_mapCourseByTeacher = new Dictionary<string, List<int>>();
+        static Dictionary<string, List<int>> _mapCourseByTeacher = new Dictionary<string, List<int>>();
 
         /// <summary>
         /// 학년 - 강좌인덱스(chromosome에서의 순서) map
         /// </summary>
-        static Dictionary<int, List<int>> m_mapCourseByYear = new Dictionary<int, List<int>>();
+        static Dictionary<int, List<int>> _mapCourseByYear = new Dictionary<int, List<int>>();
 
         /// <summary>
         /// 강좌 ID - 강좌 인덱스 map
         /// </summary>
-        static Dictionary<string, List<int>> m_mapCourseByID = new Dictionary<string, List<int>>();
+        static Dictionary<string, List<int>> _mapCourseByID = new Dictionary<string, List<int>>();
 
         /// <summary>
         /// 강좌 정보를 읽어와서 리스트로 만듭니다.
@@ -115,38 +116,38 @@ namespace GeneticAlgorithmTimeTable
             {
                 // 교수자-과목 매핑
                 List<int> courseIndices1;
-                if (m_mapCourseByTeacher.TryGetValue(courses[i].Teacher, out courseIndices1))
+                if (_mapCourseByTeacher.TryGetValue(courses[i].Teacher, out courseIndices1))
                 {
                     courseIndices1.Add(i);
                 }
                 else
                 {
                     courseIndices1 = new List<int> { i };
-                    m_mapCourseByTeacher.Add(courses[i].Teacher, courseIndices1);
+                    _mapCourseByTeacher.Add(courses[i].Teacher, courseIndices1);
                 }
 
                 // 학년-과목 매핑
                 List<int> courseIndices2;
-                if (m_mapCourseByYear.TryGetValue(courses[i].Year, out courseIndices2))
+                if (_mapCourseByYear.TryGetValue(courses[i].Year, out courseIndices2))
                 {
                     courseIndices2.Add(i);
                 }
                 else
                 {
                     courseIndices2 = new List<int> { i };
-                    m_mapCourseByYear.Add(courses[i].Year, courseIndices2);
+                    _mapCourseByYear.Add(courses[i].Year, courseIndices2);
                 }
 
                 // ID-과목 매핑
                 List<int> courseIndices3;
-                if (m_mapCourseByID.TryGetValue(courses[i].ID, out courseIndices3))
+                if (_mapCourseByID.TryGetValue(courses[i].ID, out courseIndices3))
                 {
                     courseIndices3.Add(i);
                 }
                 else
                 {
                     courseIndices3 = new List<int> { i };
-                    m_mapCourseByID.Add(courses[i].ID, courseIndices3);
+                    _mapCourseByID.Add(courses[i].ID, courseIndices3);
                 }
             }
 
@@ -182,7 +183,7 @@ namespace GeneticAlgorithmTimeTable
         private static bool CheckValidity(Chromosome chromosome)
         {
             // 강한 제약 조건 1. 같은 교수자일 경우 동일 시간을 피한다.
-            foreach (List<int> sameTeacherCourses in m_mapCourseByTeacher.Values)
+            foreach (List<int> sameTeacherCourses in _mapCourseByTeacher.Values)
             {
                 if (sameTeacherCourses.Count > 1)
                 {
@@ -200,7 +201,7 @@ namespace GeneticAlgorithmTimeTable
             }
 
             // 강한 제약 조건 2. 전필 과목에 한해서 같은 학년 수업이고 동일 과목이 아닌 경우 동일 시간을 피한다.
-            foreach (List<int> sameYearCourses in m_mapCourseByYear.Values)
+            foreach (List<int> sameYearCourses in _mapCourseByYear.Values)
             {
                 if (sameYearCourses.Count > 1)
                 {
@@ -241,7 +242,7 @@ namespace GeneticAlgorithmTimeTable
                     ++invalidCount;
             }
 
-            Console.WriteLine(string.Format("{0}th Generation has {1} average.", e.Generation, e.Population.AverageFitness));
+            Console.WriteLine(string.Format("{0}th Generation has {1} invalid solutions.", e.Generation, invalidCount));
         }
 
         /// <summary>
@@ -249,10 +250,42 @@ namespace GeneticAlgorithmTimeTable
         /// </summary>
         private static double CalculateFitness(Chromosome chromosome)
         {
+            double fitness = 1;
             if (false == CheckValidity(chromosome))
-                return 0;
-            else
-                return 0.5 + Ran.NextDouble() / 2;
+                fitness -= 0.5;
+
+            foreach (List<string> student in _studentDemands)
+            {
+                List<CourseGene> demandedCourses = new List<CourseGene>();
+                foreach (string courseID in student)
+                {
+                    if (_mapCourseByID.ContainsKey(courseID))
+                    {
+                        List<int> courseIndex = _mapCourseByID[courseID];
+                        demandedCourses.Add((CourseGene)chromosome.Genes[courseIndex[0]].ObjectValue);
+                    }
+                }
+
+                // 겹치면 fitness 벌점
+                bool bOverlapped = false;
+                for (int i = 0; i < demandedCourses.Count; ++i)
+                {
+                    for (int j = i + 1; j < demandedCourses.Count; ++j)
+                    {
+                        if (demandedCourses[i].IsOverlap(demandedCourses[j]))
+                        {
+                            bOverlapped = true;
+                            break;
+                        }
+                    }
+                    if (bOverlapped)
+                        break;
+                }
+                if (bOverlapped)
+                    fitness -= 0.5d / _studentDemands.Count;
+            }
+
+            return fitness;
             //var distanceToTravel = CalculateDistance(chromosome);
             //return 1 - distanceToTravel / 10000;
         }
@@ -262,6 +295,19 @@ namespace GeneticAlgorithmTimeTable
         /// </summary>
         public static bool Terminate(Population population, int currentGeneration, long currentEvaluation)
         {
+            int invalidCount = 0;
+            foreach (Chromosome chromosome in population.Solutions)
+            {
+                double fitness = chromosome.Fitness;
+                double newFit = CalculateFitness(chromosome);
+                if (fitness != newFit && fitness * newFit == 0)
+                {
+                    Console.Write("?");
+                }
+                if (false == CheckValidity(chromosome))
+                    ++invalidCount;
+            }
+            
             return currentGeneration > 400;
         }
     }

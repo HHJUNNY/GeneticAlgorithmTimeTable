@@ -30,7 +30,7 @@ namespace GeneticAlgorithmTimeTable
         /// <summary>
         /// 랜덤으로 시간 배정
         /// </summary>
-        public void GenerateRandomTime()
+        private void GenerateRandomTime()
         {
             // fixed time이 있을 경우 그대로 배정하고, 없을 경우 랜덤 배정
             if (CourseInfo.FixedTime == String.Empty)
@@ -149,7 +149,7 @@ namespace GeneticAlgorithmTimeTable
 
         public override string ToString()
         {
-            return string.Format("{0} {1:D2}:{2:D2} [{3}]", Day == null ? "" : ((CourseDay)Day).ToString(), Period == null ? 0 : (int)Period, Period == null ? 0 : (int)(Period - (int)Period) * 60, CourseInfo.ToString());
+            return string.Format("{0} {1:D2}:{2:D2} [{3}]", Day == null ? "" : ((CourseDay)Day).ToString(), Period == null ? 0 : (int)Period, Period == null ? 0 : (int)((Period - (int)Period) * 60d), CourseInfo.ToString());
         }
     }
 
