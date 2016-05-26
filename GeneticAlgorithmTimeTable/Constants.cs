@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace GeneticAlgorithmTimeTable
 {
@@ -14,7 +15,7 @@ namespace GeneticAlgorithmTimeTable
         #region Singleton Pattern
         private static Constants instance;
 
-        private Constants() { Read(); }
+        private Constants() { }
 
         public static Constants Instance
         {
@@ -73,15 +74,32 @@ namespace GeneticAlgorithmTimeTable
         /// 탈출 조건
         /// </summary>
         public double TerminateFitness { get; private set; }
+
+        /// <summary>
+        /// 탈출 조건
+        /// </summary>
+        public int TerminateGeneration { get; private set; }
         
-        private void Read()
+        public void Read()
         {
-            PopulationSize = 100;
-            ElitismPercentage = 5;
-            CrossoverProbability = 0.7;
-            RandomReplaceProbability = 30;
-            MutateProbability = 0.02;
-            TerminateFitness = 0.99;
+            StreamReader reader = new StreamReader("Input.txt");
+
+            string line = reader.ReadLine();
+            PopulationSize = Int32.Parse(line);
+            line = reader.ReadLine();
+            ElitismPercentage = Int32.Parse(line);
+            line = reader.ReadLine();
+            CrossoverProbability = Double.Parse(line);
+            line = reader.ReadLine();
+            RandomReplaceProbability = Int32.Parse(line);
+            line = reader.ReadLine();
+            MutateProbability = Double.Parse(line);
+            line = reader.ReadLine();
+            TerminateGeneration = Int32.Parse(line);
+            line = reader.ReadLine();
+            TerminateFitness = Double.Parse(line);
+
+            reader.Close();
         }
     }
 }

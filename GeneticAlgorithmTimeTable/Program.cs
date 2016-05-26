@@ -17,6 +17,9 @@ namespace GeneticAlgorithmTimeTable
 
         private static void Main(string[] args)
         {
+            // 상수 읽기
+            Constants.Instance.Read();
+
             // 시간표 편성 대상 강좌 읽어오기
             StreamReader reader = new StreamReader("CourseInformation.txt", Encoding.Unicode);
             var courses = ReadCourses(reader);
@@ -421,7 +424,8 @@ namespace GeneticAlgorithmTimeTable
         /// </summary>
         public static bool Terminate(Population population, int currentGeneration, long currentEvaluation)
         {            
-            return currentGeneration >= 1000 || population.GetTop(1)[0].Fitness > Constants.Instance.TerminateFitness;
+            return currentGeneration >= Constants.Instance.TerminateGeneration || 
+            population.GetTop(1)[0].Fitness > Constants.Instance.TerminateFitness;
         }
     }
 }
