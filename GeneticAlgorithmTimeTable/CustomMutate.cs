@@ -41,33 +41,23 @@ namespace GeneticAlgorithmTimeTable
     public class CustomMutate : IGeneticOperator
     {
         private double _mutationProbabilityS;
-        private bool _allowDuplicatesS;
         private readonly object _syncLock = new object();
 
         /// <summary>
         /// Internal Constructor for unit Testing.
         /// </summary>
-        internal CustomMutate() : this(1.0, true)
+        internal CustomMutate() : this(1.0)
         {
 
         }
+
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="mutationProbability"></param>
         public CustomMutate(double mutationProbability)
-            : this(mutationProbability, true)
-        {
-        }
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="mutationProbability"></param>
-        /// <param name="allowDuplicates"></param>
-        public CustomMutate(double mutationProbability, bool allowDuplicates)
         {
             _mutationProbabilityS = mutationProbability;
-            _allowDuplicatesS = allowDuplicates;
             Enabled = true;
 
         }
@@ -98,24 +88,8 @@ namespace GeneticAlgorithmTimeTable
             foreach (var chromosome in solutionsToProcess)
             {
                 var mutationProbability = MutationProbability >= 0 ? MutationProbability : 0.0;
-
-
-                if (AllowDuplicates)
-                {
-                    Mutate(chromosome, mutationProbability, fitnessFunctionDelegate);
-                }
-                else
-                {
-                    Mutate(chromosome, mutationProbability, fitnessFunctionDelegate);
-
-                    //check for duplicates
-                    if (!newPopulation.SolutionExists(chromosome))
-                    {
-                        //safe to include chromosome
-                        chromosome.Genes.AddRangeCloned(chromosome.Genes);
-                    }
-
-                }
+                
+                Mutate(chromosome, mutationProbability, fitnessFunctionDelegate);
             }
 
             //copy everything accross including elites
@@ -155,6 +129,8 @@ namespace GeneticAlgorithmTimeTable
                     gene.ObjectValue = new CourseGene(courseGene.CourseInfo);
                 }
             }
+
+            child.Evaluate(fitnessFunctionDelegate);
         }
 
         /// <summary>
@@ -187,29 +163,6 @@ namespace GeneticAlgorithmTimeTable
                     _mutationProbabilityS = value;
                 }
             }
-        }
-
-
-        /// <summary>
-        /// Sets/Gets whether duplicates are allowed in the population. 
-        /// The setting and getting of this property is thread safe.
-        /// </summary>
-        public bool AllowDuplicates
-        {
-            get
-            {
-                lock (_syncLock)
-                {
-                    return _allowDuplicatesS;
-                }
-            }
-            set
-            {
-                lock (_syncLock)
-                {
-                    _allowDuplicatesS = value;
-                }
-            }
-        }
+        }        
     }
 }

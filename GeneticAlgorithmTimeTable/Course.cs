@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GeneticAlgorithmTimeTable
 {    
-    class Course
+    public class Course
     {
         public string ID { private set; get; }              // 강좌 번호
         public int Year { private set; get; }               // 학년
@@ -49,7 +49,7 @@ namespace GeneticAlgorithmTimeTable
 
         public override string ToString()
         {
-            return string.Format("{0}: {1} ({2}) {3}", ID, Name, CourseNumber, Teacher);
+            return string.Format("{0}\t{1}\t{2}\t{3}", ID, Name, CourseNumber, Teacher);
         }
     }
 }

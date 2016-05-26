@@ -42,7 +42,7 @@ namespace GeneticAlgorithmTimeTable
         /// <summary>
         /// 이론 2학점 수업이 선택 가능한 요일
         /// </summary>
-        public List<CourseDay> AvailableDay_2Credit = new List<CourseDay> { CourseDay.A, CourseDay.B, CourseDay.C, CourseDay.D };
+        public List<CourseDay> AvailableDay_2Credit = new List<CourseDay> { CourseDay.AC, CourseDay.BD, CourseDay.A, CourseDay.B, CourseDay.C, CourseDay.D, CourseDay.E };
 
         /// <summary>
         /// 한 세대 인구 수
@@ -63,13 +63,25 @@ namespace GeneticAlgorithmTimeTable
         /// 돌연변이 %
         /// </summary>
         public double MutateProbability { get; private set; }
+
+        /// <summary>
+        /// 새 랜덤 해 %
+        /// </summary>
+        public int RandomReplaceProbability { get; private set; }
+
+        /// <summary>
+        /// 탈출 조건
+        /// </summary>
+        public double TerminateFitness { get; private set; }
         
         private void Read()
         {
-            PopulationSize = 200;
+            PopulationSize = 100;
             ElitismPercentage = 5;
-            CrossoverProbability = 0.8;
-            MutateProbability = 0.002;
+            CrossoverProbability = 0.7;
+            RandomReplaceProbability = 30;
+            MutateProbability = 0.02;
+            TerminateFitness = 0.99;
         }
     }
 }

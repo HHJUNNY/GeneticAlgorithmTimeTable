@@ -11,7 +11,9 @@ namespace GeneticAlgorithmTimeTable
         public Course CourseInfo { private set; get; }      // 강좌 정보
 
         public CourseDay? Day { private set; get; }          // 요일
-        public double? Period { private set; get; }          // 시작 시간
+        public double? Begin { private set; get; }          // 시작 시간
+
+        private double _end;                                // 끝나는 시간
         
         // 수업 시간을 <시작, 끝> 순서쌍의 모음으로 표현한 것.
         // 월요일 0시를 0으로, 1=1시간으로 표현. 화요일 0시는 24, 수요일 0시는 48, ...
@@ -46,18 +48,23 @@ namespace GeneticAlgorithmTimeTable
                             Day = Constants.Instance.AvailableDay_3Credit[randomIndex];
                             // 시간 결정
                             randomIndex = Program.Ran.Next(Constants.Instance.AvailablePeriod_23Credit.Count);
-                            Period = Constants.Instance.AvailablePeriod_23Credit[randomIndex];
+                            Begin = Constants.Instance.AvailablePeriod_23Credit[randomIndex];
+                            _end = (double)Begin + 1.5d;
                         }
                         break;
                     case 2:
-                        // 이론 2학점 수업: 월/화/수/목/금 중 2시간 연속 배정
+                        // 이론 2학점 수업: 월/화/수/목/금 중 2시간+2시간 연속 배정 or 월수/화금 2시간씩
                         {
                             // 요일 결정
                             int randomIndex = Program.Ran.Next(Constants.Instance.AvailableDay_2Credit.Count);
                             Day = Constants.Instance.AvailableDay_2Credit[randomIndex];
                             // 시간 결정
                             randomIndex = Program.Ran.Next(Constants.Instance.AvailablePeriod_23Credit.Count);
-                            Period = Constants.Instance.AvailablePeriod_23Credit[randomIndex];
+                            Begin = Constants.Instance.AvailablePeriod_23Credit[randomIndex];
+                            if ((CourseDay)Day == CourseDay.AC || (CourseDay)Day == CourseDay.BD)
+                                _end = (Double)Begin + 2;
+                            else
+                                _end = (Double)Begin + 4;
                         }
                         break;
                     default:
@@ -70,12 +77,13 @@ namespace GeneticAlgorithmTimeTable
             else
             {
                 // Fixed Time이 있는 경우는 Day나 Period가 배정 안됐을때만 배정해주면 됨
-                if (Day == null && Period == null)
+                if (Day == null && Begin == null)
                 {
                     // FixedTime은 "BD 1530-1700", "C 0930-1130" 식으로 들어옴. 파싱해준다.
                     string[] tokens = CourseInfo.FixedTime.Split(' ');
                     Day = (CourseDay)Enum.Parse(typeof(CourseDay), tokens[0]);
-                    Period = Double.Parse(tokens[1].Substring(0, 2)) + Double.Parse(tokens[1].Substring(2, 2)) / 60d;
+                    Begin = Double.Parse(tokens[1].Substring(0, 2)) + Double.Parse(tokens[1].Substring(2, 2)) / 60d;
+                    _end = Double.Parse(tokens[1].Substring(5, 2)) + Double.Parse(tokens[1].Substring(7, 2)) / 60d;
                 }
             }
 
@@ -96,24 +104,24 @@ namespace GeneticAlgorithmTimeTable
                 case CourseDay.D:
                 case CourseDay.E:
                     {
-                        // 하루짜리 수업은 하나의 Tuple로 구성. 수업 길이 = 이론학점수.
+                        // 하루짜리 수업은 하나의 Tuple로 구성
                         ClassHoursOfWeek.Add(new Tuple<double, double>(
-                            (double)(Day) * 24d + (double)Period,
-                            (double)(Day) * 24d + (double)Period + CourseInfo.TheoryCredit
+                            (double)(Day) * 24d + (double)Begin,
+                            (double)(Day) * 24d + _end
                             ));
                     }
                     break;
                 case CourseDay.AC:
                 case CourseDay.BD:
                     {
-                        // 이틀짜리 수업은 두개의 Tuple로 구성. 수업 길이 = 이론학점수/2.
+                        // 이틀짜리 수업은 두개의 Tuple로 구성
                         ClassHoursOfWeek.Add(new Tuple<double, double>(
-                            (double)(Day - CourseDay.AC) * 24d + (double)Period,
-                            (double)(Day - CourseDay.AC) * 24d + (double)Period + CourseInfo.TheoryCredit / 2d
+                            (double)(Day - CourseDay.AC) * 24d + (double)Begin,
+                            (double)(Day - CourseDay.AC) * 24d + _end
                             ));
                         ClassHoursOfWeek.Add(new Tuple<double, double>(
-                            (double)(Day - CourseDay.AC + CourseDay.C) * 24d + (double)Period,
-                            (double)(Day - CourseDay.AC + CourseDay.C) * 24d + (double)Period + CourseInfo.TheoryCredit / 2d
+                            (double)(Day - CourseDay.AC + CourseDay.C) * 24d + (double)Begin,
+                            (double)(Day - CourseDay.AC + CourseDay.C) * 24d + _end
                             ));
                     }
                     break;
@@ -149,7 +157,7 @@ namespace GeneticAlgorithmTimeTable
 
         public override string ToString()
         {
-            return string.Format("{0} {1:D2}:{2:D2} [{3}]", Day == null ? "" : ((CourseDay)Day).ToString(), Period == null ? 0 : (int)Period, Period == null ? 0 : (int)((Period - (int)Period) * 60d), CourseInfo.ToString());
+            return string.Format("{0}\t{1:D2}:{2:D2}\t{3}", Day == null ? "" : ((CourseDay)Day).ToString(), Begin == null ? 0 : (int)Begin, Begin == null ? 0 : (int)((Begin - (int)Begin) * 60d), CourseInfo.ToString());
         }
     }
 
