@@ -15,6 +15,8 @@ namespace GeneticAlgorithmTimeTable
         private static List<List<string>> _studentsDemands;
         private static StreamWriter _writer;
 
+        private static DateTime _startTime;
+
         private static void Main(string[] args)
         {
             // 상수 읽기
@@ -25,7 +27,8 @@ namespace GeneticAlgorithmTimeTable
             var courses = ReadCourses(reader);
             reader.Close();
             reader = new StreamReader("StudentDemand.txt", Encoding.Unicode);
-            _writer = new StreamWriter(string.Format("{0:yyyy-MM-dd HH/mm/ss}.txt", DateTime.Now), false, Encoding.Unicode);
+            _startTime = DateTime.Now;
+            _writer = new StreamWriter(string.Format("{0:yyyy-MM-dd HH/mm/ss}.txt", _startTime), false, Encoding.Unicode);
             _studentsDemands = ReadStudentDemands(reader);
             reader.Close();
 
@@ -84,7 +87,7 @@ namespace GeneticAlgorithmTimeTable
 
             string line = string.Format("Algorithm start: {0}", DateTime.Now);
             WriteLine(line);
-            line = "Generation\tFittest\tAverage\tMedian\t";
+            line = "Generation\tFittest\tAverage\tMedian\tMinimum";
             WriteLine(line);
 
             //run the GA
@@ -283,7 +286,11 @@ namespace GeneticAlgorithmTimeTable
 
         static void ga_OnRunComplete(object sender, GaEventArgs e)
         {
-            string line = string.Format("Algorithm end: {0}", DateTime.Now);
+            DateTime endTime = DateTime.Now;
+            string line = string.Format("Algorithm end: {0}", endTime);
+            WriteLine(line);
+
+            line = string.Format("Elapsed Time: {0} ms", (endTime - _startTime).Milliseconds);
             WriteLine(line);
 
             var fittest = e.Population.GetTop(1)[0];
@@ -300,8 +307,8 @@ namespace GeneticAlgorithmTimeTable
         private static void ga_OnGenerationComplete(object sender, GaEventArgs e)
         {
             var fittest = e.Population.GetTop(1)[0];
-            var median = e.Population.GetTopPercent(50)[0];
-            string line = string.Format("{0}\t{1:0.0000}\t{2:0.0000}\t{3:0.0000}", e.Generation, fittest.Fitness, e.Population.AverageFitness, median.Fitness);
+            var median = e.Population.GetTop(50)[49];            
+            string line = string.Format("{0}\t{1:0.0000}\t{2:0.0000}\t{3:0.0000}\t{4:0.0000}", e.Generation, fittest.Fitness, e.Population.AverageFitness, median.Fitness, e.Population.MinimumFitness);
             WriteLine(line);
         }
 
